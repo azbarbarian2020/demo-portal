@@ -18,6 +18,14 @@ export default function AdminPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    const res = await fetch(`/api/demos/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setDemos(demos.filter((d) => d.id !== id));
+    }
+  };
+
   return (
     <div className="px-6 py-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -96,10 +104,16 @@ export default function AdminPage() {
                       href={demo.entry_url.startsWith("http") ? demo.entry_url : `https://${demo.entry_url}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-gray-500 hover:underline"
+                      className="text-xs text-gray-500 hover:underline mr-3"
                     >
                       Launch
                     </a>
+                    <button
+                      onClick={() => handleDelete(demo.id, demo.name)}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

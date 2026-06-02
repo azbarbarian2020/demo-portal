@@ -52,6 +52,23 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    await executeQuery(
+      `DELETE FROM DEMO_PORTAL.PUBLIC.DEMOS WHERE id = ?`,
+      [parseInt(id)]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
