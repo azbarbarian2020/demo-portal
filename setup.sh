@@ -196,7 +196,7 @@ generate_new_key() {
 create_external_access() {
     echo -e "${BOLD}[4/8] Creating network rules and external access integration...${NC}"
 
-    S3_HOST=$(snow_sql -q "SELECT PARSE_JSON(VALUE)['host']::VARCHAR AS host FROM TABLE(FLATTEN(INPUT => PARSE_JSON(SYSTEM\$ALLOWLIST()))) WHERE PARSE_JSON(VALUE)['type']::VARCHAR = 'STAGE' AND PARSE_JSON(VALUE)['host']::VARCHAR LIKE '%s3.%amazonaws.com' LIMIT 1;" --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['HOST'])" 2>/dev/null || echo "")
+    S3_HOST=$(snow_sql -q "SELECT SPLIT_PART(GET_PRESIGNED_URL(@${DATABASE}.${SCHEMA}.IMAGES_STAGE, 'probe.txt'), '/', 3) AS HOST;" --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['HOST'])" 2>/dev/null || echo "")
 
     if [ -n "$S3_HOST" ]; then
         echo "  S3 stage host: $S3_HOST"
