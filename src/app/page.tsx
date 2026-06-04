@@ -17,13 +17,24 @@ export default function Home() {
   const [capabilities, setCapabilities] = useState<string[]>(DEFAULT_CAPABILITIES);
 
   useEffect(() => {
-    fetch("/api/demos")
-      .then((r) => r.json())
-      .then((data) => {
-        setDemos(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const fetchDemos = async (retries = 3): Promise<void> => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const r = await fetch("/api/demos");
+          if (!r.ok) throw new Error(`${r.status}`);
+          const data = await r.json();
+          if (Array.isArray(data)) {
+            setDemos(data);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          if (i < retries - 1) await new Promise((res) => setTimeout(res, 1500));
+        }
+      }
+      setLoading(false);
+    };
+    fetchDemos();
 
     fetch("/api/settings")
       .then((r) => r.json())
